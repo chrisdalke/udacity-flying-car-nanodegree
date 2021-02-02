@@ -11,6 +11,7 @@ from udacidrone.messaging import MsgID
 # Project 1 - Backyard Flyer
 # Chris Dalke
 # chrisdalke@gmail.com
+# Boilerplate code from https://github.com/udacity/FCND-Backyard-Flyer/
 # ------------------------------------------------------------------
 # Notes:
 # Moves the drone in a box shape, and then lands.
