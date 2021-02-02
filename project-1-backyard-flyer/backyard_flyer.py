@@ -18,6 +18,10 @@ from udacidrone.messaging import MsgID
 # My code uses the local position callback to check if we are near
 # the target position, and navigates to the next point in sequence. 
 #
+# I don't use the velocity update callback since it seemed unnecessary,
+# the position callback occurs less frequently and we need to also check
+# the position so I check the velocity there.
+#
 # This implementation seems to pause for longer than necessary waiting
 # for the position and/or velocity to zero out. Could experiment more with
 # tweaking the thresholds, or allowing a position that has overshot
@@ -155,7 +159,7 @@ class BackyardFlyer(Drone):
     def waypoint_transition(self):
         # 1. Command the next waypoint position
         # 2. Transition to WAYPOINT state
-        if (self.flight_state == States.TAKEOFF):
+        if (self.flight_state != States.WAYPOINT):
             self.logMessage("Setting flight state to WAYPOINT")
             self.flight_state = States.WAYPOINT
 
