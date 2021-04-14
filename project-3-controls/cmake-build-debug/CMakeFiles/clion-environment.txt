@@ -1,0 +1,4 @@
+ToolSet: w64 8.0 (local)@C:\Program Files\mingw-w64\winlibs-x86_64-posix-seh-gcc-10.2.0-llvm-11.0.0-mingw-w64-8.0.0-r3\mingw64
+Options: 
+
+Options:

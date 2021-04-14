@@ -1,0 +1,20 @@
+"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" "C:\Users\chris\Desktop\Flying Car Nanodegree\udacity-flying-car-nanodegree\project-3-controls"
+CMake Error at CMakeLists.txt:29 (find_package):
+  By not providing "FindQt5Core.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Qt5Core", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Qt5Core" with any
+  of the following names:
+
+    Qt5CoreConfig.cmake
+    qt5core-config.cmake
+
+  Add the installation prefix of "Qt5Core" to CMAKE_PREFIX_PATH or set
+  "Qt5Core_DIR" to a directory containing one of the above files.  If
+  "Qt5Core" provides a separate development package or SDK, be sure it has
+  been installed.
+
+
+-- Configuring incomplete, errors occurred!
+See also "C:/Users/chris/Desktop/Flying Car Nanodegree/udacity-flying-car-nanodegree/project-3-controls/cmake-build-debug/CMakeFiles/CMakeOutput.log".
