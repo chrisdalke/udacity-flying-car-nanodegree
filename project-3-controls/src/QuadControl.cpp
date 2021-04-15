@@ -80,10 +80,10 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   float q_bar = momentCmd.y / l;
   float r_bar = momentCmd.z / kappa;
 
-  float f_1 = (c_bar + p_bar + q_bar + r_bar) / 4.0f;
-  float f_2 = (c_bar - p_bar + q_bar - r_bar) / 4.0f;
-  float f_4 = (c_bar + p_bar - q_bar - r_bar) / 4.0f;
-  float f_3 = (c_bar - p_bar - q_bar + r_bar) / 4.0f;
+  float f_1 = (c_bar + p_bar + q_bar - r_bar) / 4.0f;
+  float f_2 = (c_bar - p_bar + q_bar + r_bar) / 4.0f;
+  float f_4 = (c_bar + p_bar - q_bar + r_bar) / 4.0f;
+  float f_3 = (c_bar - p_bar - q_bar - r_bar) / 4.0f;
 
   // Remap the forces to their corresponding motor indexes
   // Constrain the values to allowed motor thrust limits
@@ -115,7 +115,13 @@ V3F QuadControl::BodyRateControl(V3F pqrCmd, V3F pqr)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  
+  // The body-rate controller is a P controller.
+  V3F prqError = pqrCmd - pqr;
+  V3F rateCmd = kpPQR * prqError;
+
+  // Compute moment from rate
+  V3F I(Ixx, Iyy, Izz);
+  momentCmd = I * rateCmd;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -146,7 +152,23 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  // Compute collective acceleration from thrust
+  float collThrustAccel = collThrustCmd / mass;
 
+  // Exit early if we are applying negative/no thrust
+  if (collThrustAccel <= 0.0f) {
+    return pqrCmd;
+  }
+ 
+  // Compute target with P controllers
+  float b_x_c_target = -CONSTRAIN(accelCmd.x / collThrustAccel, -maxTiltAngle, maxTiltAngle);
+  float b_y_c_target = -CONSTRAIN(accelCmd.y / collThrustAccel, -maxTiltAngle, maxTiltAngle);
+  float b_x_c_dot = kpBank * (-b_x_c_target + R(0, 2));
+  float b_y_c_dot = kpBank * (-b_y_c_target + R(1, 2));
+
+  // Calculate roll/pitch rate commands with some linear algebra
+  pqrCmd.x = (-(R(1, 0) * b_x_c_dot) + (R(0, 0) * b_y_c_dot)) / R(2, 2);
+  pqrCmd.y = (-(R(1, 1) * b_x_c_dot) + (R(0, 1) * b_y_c_dot)) / R(2, 2);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -178,7 +200,22 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  float g = 9.81;
 
+  // Compute the target velocity, a combination of the commanded velocity and a P controller for the position.
+  float z_error = posZCmd - posZ;
+  float z_dot_command = (kpPosZ * z_error) + velZCmd;
+  integratedAltitudeError += z_error * dt;
+  
+  // Limit the target velocity
+  z_dot_command = CONSTRAIN(z_dot_command, -maxDescentRate, maxAscentRate);
+
+  // PI controller to control vertical velocity via acceleration.
+  float z_dot_dot_command = (kpVelZ * (z_dot_command - velZ)) + accelZCmd + (KiPosZ * integratedAltitudeError);
+
+  // Convert the vertical acceleration to a thrust in the body frame
+  // Thrust is inverted; negative thrust in NED frame actually means UP
+  thrust = -((z_dot_dot_command - g) * mass) / R(2, 2);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
   
@@ -216,8 +253,21 @@ V3F QuadControl::LateralPositionControl(V3F posCmd, V3F velCmd, V3F pos, V3F vel
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  
+  // Constrain the velocity to the maximum proportionally
+  float velMagnitude = velCmd.magXY();
+  if (velMagnitude > maxSpeedXY) {
+    velCmd *= maxSpeedXY / velMagnitude;
+  }
 
+  // PD controller; controls the lateral position through acceleration (Second-order system)
+  accelCmd += (kpPosXY * (posCmd - pos)) + (kpVelXY * (velCmd - vel));
+
+  // Constrain the acceleration to the maximum proportionally
+  float accelMagnitude = accelCmd.magXY();
+  if (accelMagnitude > maxAccelXY) {
+    accelCmd *= maxAccelXY / accelMagnitude;
+  }
+  
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return accelCmd;
@@ -238,7 +288,22 @@ float QuadControl::YawControl(float yawCmd, float yaw)
 
   float yawRateCmd=0;
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  
+  // Compute yaw, wrapped around in a circle, and the error 
+  float yawCmdWrapped = fmodf(yawCmd, 2.0f * F_PI);
+  float yawError = yawCmd - yaw;
 
+  // If the error is greater than PI, flip it so we travel the other direction
+  // This ensures we're always taking the closest path to the target
+  if (yawError > F_PI) {
+    yawError -= 2.0f * F_PI;
+  }
+  else if (yawError < -F_PI) {
+    yawError += 2.0f * F_PI;
+  }
+
+  // Run P controller
+  yawRateCmd = (kpYaw * (yawCmd - yaw));
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
