@@ -70,10 +70,27 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  cmd.desiredThrustsN[0] = mass * 9.81f / 4.f; // front left
-  cmd.desiredThrustsN[1] = mass * 9.81f / 4.f; // front right
-  cmd.desiredThrustsN[2] = mass * 9.81f / 4.f; // rear left
-  cmd.desiredThrustsN[3] = mass * 9.81f / 4.f; // rear right
+  // Compute the length in a single axis of the moment arm
+  float l = L / sqrt(2.0f);
+
+  // Solve system of linear equations to determine the individual thrusts
+  // A full outline of the math provided in my writeup
+  float c_bar = collThrustCmd;
+  float p_bar = momentCmd.x / l;
+  float q_bar = momentCmd.y / l;
+  float r_bar = momentCmd.z / kappa;
+
+  float f_1 = (c_bar + p_bar + q_bar + r_bar) / 4.0f;
+  float f_2 = (c_bar - p_bar + q_bar - r_bar) / 4.0f;
+  float f_4 = (c_bar + p_bar - q_bar - r_bar) / 4.0f;
+  float f_3 = (c_bar - p_bar - q_bar + r_bar) / 4.0f;
+
+  // Remap the forces to their corresponding motor indexes
+  // Constrain the values to allowed motor thrust limits
+  cmd.desiredThrustsN[0] = CONSTRAIN(f_1, minMotorThrust, maxMotorThrust);
+  cmd.desiredThrustsN[1] = CONSTRAIN(f_2, minMotorThrust, maxMotorThrust);
+  cmd.desiredThrustsN[2] = CONSTRAIN(f_4, minMotorThrust, maxMotorThrust);
+  cmd.desiredThrustsN[3] = CONSTRAIN(f_3, minMotorThrust, maxMotorThrust);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
