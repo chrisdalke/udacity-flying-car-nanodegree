@@ -4,7 +4,6 @@ import numpy as np
 import math
 from skimage.morphology import medial_axis
 from skimage.util import invert
-import networkx as nx
 
 def create_grid(data, drone_altitude, safety_distance):
     """
@@ -46,6 +45,7 @@ def create_grid(data, drone_altitude, safety_distance):
 
 def create_medial_axis_grid(grid):
     return medial_axis(invert(grid))
+
 
 # Assume all actions cost the same.
 class Action(Enum):
@@ -158,6 +158,7 @@ def a_star(grid, h, start, goal):
         print('**********************') 
     return path[::-1], path_cost
 
+
 def heuristic(position, goal_position):
     return np.linalg.norm(np.array(position) - np.array(goal_position))
 
@@ -172,7 +173,6 @@ def find_start_goal(skel, start, goal):
     near_goal = skel_cells[goal_min_dist]
     
     return near_start, near_goal
-
 
 
 def a_star(grid, h, start, goal):
@@ -227,8 +227,6 @@ def a_star(grid, h, start, goal):
     return path[::-1], path_cost
 
 
-
-
 def heuristic(position, goal_position):
     return np.linalg.norm(np.array(position) - np.array(goal_position))
 
@@ -238,10 +236,12 @@ def heuristic(position, goal_position):
 def point(p):
     return np.array([p[0], p[1], 1.]).reshape(1, -1)
 
+
 def collinearity_check(p1, p2, p3, epsilon=1e-6):   
     m = np.concatenate((p1, p2, p3), 0)
     det = np.linalg.det(m)
     return abs(det) < epsilon
+
 
 # Prune a path of waypoints using collinearity.
 def collinearity_prune(path):

@@ -138,7 +138,7 @@ class MotionPlanning(Drone):
 
         # retrieve current global position
         # convert to current local position using global_to_local()
-        local_start_pos = global_to_local((homeLon, homeLat, 0), self.global_home)
+        local_start_pos = global_to_local(self.global_position, self.global_home)
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
                                                                          self.local_position))
         # Read in obstacle map
@@ -150,7 +150,7 @@ class MotionPlanning(Drone):
 
         # Build medial-axis grid for pathfinding
         print("Creating medial-axis grid...")
-        createMedialGrid = False
+        createMedialGrid = True
         if createMedialGrid:
             medial_grid = create_medial_axis_grid(grid)
             np.save('medial_grid', medial_grid)
