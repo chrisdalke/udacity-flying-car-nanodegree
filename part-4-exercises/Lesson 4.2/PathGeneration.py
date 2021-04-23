@@ -5,7 +5,7 @@ def flight_path(total_time,dt,type='constant'):
     if type == 'constant':
 
         t=np.linspace(0.0,total_time,int(total_time/dt)+1)
-        z_path= -np.ones(t.shape[0])
+        z_path= np.ones(t.shape[0])
 
         z_dot_path = np.zeros(t.shape[0])
 
