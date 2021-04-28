@@ -4,12 +4,12 @@
 
 
 ## Scenario 1: Intro
-![scenario1](./images/scenario1.png)
+![scenario1](./images/scenario1.PNG)
 
 This first scenario is a test of the simulation, and did not require any implementation. I tweaked the value of the mass of the drone to `0.5`, which made the drone (roughly) hover.
 
 ## Scenario 2: Attitude Control
-![scenario2](./images/scenario2.png)
+![scenario2](./images/scenario2.PNG)
 The second scenario tests the attitude control system for the drone, which requires the body rate controller and the roll / pitch controller.
 
 ### 2.1: Converting collective commands to individual motor thrusts
@@ -20,7 +20,7 @@ Conceptually, this is the "innermost" math - The output of the controllers is a 
 
 To implement this, I used the equations for computing angular velocity of the individual propellers. The system of equations, after simplifying all terms to compute force instead of angular velocity:
 
-![formula1](./images/formula1.png)
+![formula1](./images/formula1.PNG)
 
 The constants can all be computed based on the inputs `collThrustCmd` and `momentCmd`:
 ```
@@ -65,7 +65,7 @@ The last part of implementing the attitude controller is the roll-pitch controll
 
 This controller drives two terms, B_x and B_y, "control knobs" for x and y. The control loop for these terms is a P controller, since the roll-pitch controller is also a first-order system.
 
-![formula2](./images/formula2.png)
+![formula2](./images/formula2.PNG)
 
 ```
 // Compute target with P controllers
@@ -77,7 +77,7 @@ float b_y_c_dot = kpBank * (-b_y_c_target + R(1, 2));
 
 The output of the P controller (b_x_c_dot and b_y_c_dot) is fed through a system of equations to get p_c and q_c, the pitch and roll rates:
 
-![formula3](./images/formula3.png)
+![formula3](./images/formula3.PNG)
 
 ```
 // Calculate roll/pitch rate commands with some linear algebra
@@ -92,7 +92,7 @@ I had to fiddle with the direction of the roll/pitch commands to get the vehicle
 I tuned the `kpPQR` and `kpBank` gains experimentally to get the vehicle to stop spinning as quickly as possible with minimal overshoot. For `kpPQR`, I chose P and Q gains of `40`. For `kpBank`, I chose a gain of `10`.
 
 ## Scenario 3: Position Control
-![scenario3](./images/scenario3.png)
+![scenario3](./images/scenario3.PNG)
 
 This scenario tests the position and yaw control of the quadrotor.
 
@@ -171,7 +171,7 @@ yawRateCmd = (kpYaw * (yawCmd - yaw));
 ```
 
 ## Scenario 4: Nonidealities
-![scenario4](./images/scenario4.png)
+![scenario4](./images/scenario4.PNG)
 
 This scenario tests conditions where the drone has some configuration that interferes with its mechanics, such as a shifted weight or increased mass. In order to account for these cases, I added the I term to the altitude controller.
 
@@ -189,6 +189,6 @@ The I term helps accommodate for the persistent altitude error on the red drone,
 
 
 ## Scenario 5: Trajectory Following
-![scenario5](./images/scenario5.png)
+![scenario5](./images/scenario5.PNG)
 
 This scenario tests the ability of the drones to follow a trajectory. I was able to tune the yellow drone (The feed-forward version) to follow the trajectory closely.
