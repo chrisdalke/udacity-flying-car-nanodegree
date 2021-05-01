@@ -8,6 +8,8 @@
 #include "BaseController.h"
 #include "Math/Mat3x3F.h"
 
+#include <iostream>
+
 #ifdef __PX4_NUTTX
 #include <systemlib/param/param.h>
 #endif
@@ -362,10 +364,10 @@ float QuadControl::YawControl(float yawCmd, float yaw)
 
   // Compute yaw, wrapped around in a circle, and the error 
   float yawCmdWrapped = fmodf(yawCmd, 2.0f * F_PI);
-  float yawError = yawCmd - yaw;
+  float yawError = yawCmdWrapped - yaw;
 
-  // If the error is greater than PI, flip it so we travel the other direction
-  // This ensures we're always taking the closest path to the target
+  //If the error is greater than PI, flip it so we travel the other direction
+  //This ensures we're always taking the closest path to the target
   if (yawError > F_PI) {
     yawError -= 2.0f * F_PI;
   }
@@ -374,7 +376,7 @@ float QuadControl::YawControl(float yawCmd, float yaw)
   }
 
   // Run P controller
-  yawRateCmd = (kpYaw * (yawCmd - yaw));
+  yawRateCmd = (kpYaw * yawError);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
