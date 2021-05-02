@@ -181,10 +181,10 @@ VectorXf QuadEstimatorEKF::PredictState(VectorXf curState, float dt, V3F accel, 
   // Integrate velocities from accelerations
   predictedState(3) += accelWorldFrame.x * dt; // Vel X
   predictedState(4) += accelWorldFrame.y * dt; // Vel Y
-  predictedState(5) += accelWorldFrame.z * dt * -1; // Vel Z
+  predictedState(5) += accelWorldFrame.z * dt; // Vel Z
 
   // Integrate gravity
-  predictedState(5) += 9.81f * dt;
+  predictedState(5) -= 9.81f * dt;
 
   // Integrate positions from velocities
   predictedState(0) += predictedState(3) * dt; // Pos X
@@ -271,14 +271,6 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
   // Create the transition jacobian
-  gPrime(0, 0) = 1;
-  gPrime(1, 1) = 1;
-  gPrime(2, 2) = 1;
-  gPrime(3, 3) = 1;
-  gPrime(4, 4) = 1;
-  gPrime(5, 5) = 1;
-  gPrime(6, 6) = 1;
-
   gPrime(0, 3) = dt;
   gPrime(1, 4) = dt;
   gPrime(2, 5) = dt;
